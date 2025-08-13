@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Université Mahia - La Nouvelle Aube de l'Apprentissage</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        :root {
+            --font-title: 'Lora', serif; --font-body: 'Poppins', sans-serif;
+            --color-primary: #0D47A1; --color-secondary: #FFC107;
+            --color-text: #333; --color-bg: #fdfdfd;
+        }
+        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); line-height: 1.7; scroll-behavior: smooth; }
+        .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+        
+        /* --- NOUVEL EN-TÊTE --- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .navbar .logo-container { display: flex; align-items: center; text-decoration: none; }
+        .navbar .logo-icon {
+            /* --- NOUVEAU LOGO SVG --- */
+            width: 40px; height: 40px; margin-right: 10px;
+        }
+        .navbar .logo-text {
+            font-family: var(--font-title); font-size: 1.5em; font-weight: 700; color: var(--color-primary);
+        }
+        .navbar .logo-text span { color: var(--color-secondary); }
+        .navbar .nav-links a { margin-left: 25px; text-decoration: none; color: var(--color-text); font-weight: 500; }
+        
+        .hero { /* ... (inchangé) ... */ }
+        
+        /* --- AMÉLIORATIONS VISUELLES --- */
+        .main-content { padding: 80px 0; }
+        .section { margin-bottom: 80px; opacity: 0; transform: translateY(30px); transition: opacity 0.6s, transform 0.6s; }
+        .section.visible { opacity: 1; transform: translateY(0); }
+        h2 { font-family: var(--font-title); font-size: 2.8em; text-align: center; margin-bottom: 50px; }
+        .value-prop { text-align: center; font-size: 1.2em; max-width: 700px; margin: 0 auto 60px auto; }
+        
+        .form-container {
+            background-color: #fff; padding: 40px; border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;
+            border-top: 5px solid var(--color-primary);
+        }
+        /* ... (le reste du CSS du formulaire est similaire) ... */
+        .submit-btn:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        
+        footer { text-align: center; padding: 40px 0; margin-top: 40px; background-color: #2c3e50; color: white; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="logo-container">
+            <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 80 Q50 10, 80 80" stroke="#0D47A1" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <circle cx="50" cy="15" r="10" fill="#FFC107"/>
+            </svg>
+            <div class="logo-text">Mah<span>ia</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="#presentation">Notre Vision</a>
+            <a href="#preinscription-form-section">Préinscription</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <!-- ... (contenu du hero inchangé) ... -->
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section id="presentation" class="section">
+                <h2>Apprenez en Construisant, Guidé par l'IA.</h2>
+                <p class="value-prop">
+                    L'Université Mahia est une académie d'un nouveau genre. Oubliez les cours théoriques et les prérequis intimidants. Ici, vous apprenez en réalisant des projets concrets, accompagné pas à pas par Kairos, votre compagnon IA personnel, qui s'adapte à votre rythme et transforme chaque obstacle en une opportunité d'apprentissage.
+                </p>
+            </section>
+
+            <section id="preinscription-form-section" class="section">
+                <!-- ... (contenu du formulaire inchangé) ... -->
+            </section>
+
+            <section id="confirmation-section" style="display: none;">
+                <!-- ... (contenu de la confirmation inchangé) ... -->
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="copyright-year">2024</span> Université Mahia. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- MISE À JOUR DYNAMIQUE DU COPYRIGHT ---
+            document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+            // --- GESTION DU FORMULAIRE (inchangée) ---
+            const form = document.getElementById('preinscription-form');
+            // ... (le reste du script du formulaire est ici)
+
+            // --- NOUVEAU : ANIMATION AU DÉFILEMENT ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
