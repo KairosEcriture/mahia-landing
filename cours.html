@@ -9,7 +9,10 @@
         :root { /* ... (variables CSS inchangées) ... */ }
         body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); height: 100%; overflow: hidden; }
         .app-container { display: flex; flex-direction: column; height: 100vh; }
-        .app-header { /* ... */ }
+        .app-header { display: flex; align-items: center; gap: 15px; padding: 15px 30px; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
+        .logo-svg { width: 30px; height: 30px; }
+        .logo-title { font-family: var(--font-title); font-size: 1.5em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--color-text); }
+        .logo-title span { color: var(--color-secondary); }
         .module-progress-bar { width: 100%; height: 8px; background-color: #e0e0e0; flex-shrink: 0; }
         .module-progress { height: 100%; background-color: var(--color-secondary); width: 0%; transition: width 0.5s ease-in-out; }
         .lesson-workspace { display: flex; flex-grow: 1; overflow: hidden; }
@@ -37,8 +40,14 @@
                 <h2 id="lesson-title">Chargement...</h2>
                 <p id="lesson-description"></p>
             </aside>
-            <section class="code-environment"><div class="code-editor"><p style="color: #888;">// L'environnement de développement apparaîtra ici.</p></div></section>
-            <aside class="kairos-chat"><p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p></aside>
+            <section class="code-environment">
+                <div class="code-editor">
+                    <p style="color: #888;">// L'environnement de développement apparaîtra ici.</p>
+                </div>
+            </section>
+            <aside class="kairos-chat">
+                <p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p>
+            </aside>
         </main>
     </div>
     <script>
@@ -50,11 +59,15 @@
             const lessonId = urlParams.get('lessonId');
             const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
 
-            if (!lessonId) { /* ... */ return; }
+            if (!lessonId) {
+                lessonTitleEl.textContent = 'Erreur';
+                lessonDescriptionEl.textContent = 'Aucune leçon sélectionnée.';
+                return;
+            }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`);
-                if (!response.ok) { throw new Error('Erreur...'); }
+                if (!response.ok) { throw new Error('Erreur lors de la récupération des données.'); }
                 const lessonData = await response.json();
                 
                 lessonTitleEl.textContent = lessonData.title;
@@ -64,15 +77,17 @@
                 if (lessonData.module && lessonData.module.lessons) {
                     const totalLessons = lessonData.module.lessons.length;
                     const currentLessonIndex = lessonData.order;
-                    const progressPercentage = ((currentLessonIndex + 1) / totalLessons) * 100;
+                    const progressPercentage = ((currentLesson-index + 1) / totalLessons) * 100;
                     
-                    // On anime la barre de progression
                     setTimeout(() => {
                         moduleProgressEl.style.width = `${progressPercentage}%`;
                     }, 100);
                 }
 
-            } catch (error) { /* ... */ }
+            } catch (error) {
+                lessonTitleEl.textContent = 'Erreur de chargement';
+                console.error(error);
+            }
         });
     </script>
 </body>
