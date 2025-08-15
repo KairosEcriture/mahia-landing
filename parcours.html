@@ -5,18 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détail du Parcours - Université Mahia</title>
     <style>
-        /* CSS Complet et Correct (inchangé) */
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        :root { --font-title: 'Lora', serif; --font-body: 'Poppins', sans-serif; --color-primary: #0D47A1; --color-secondary: #FFC107; --color-text: #333; --color-bg: #f4f7f6; }
+        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); line-height: 1.7; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        .app-header { display: flex; align-items: center; gap: 15px; padding: 20px 30px; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; }
+        .logo-svg { width: 40px; height: 40px; }
+        .logo-title { font-family: var(--font-title); font-size: 1.8em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--color-text); }
+        .logo-title span { color: var(--color-secondary); }
+        .main-content { padding: 40px 20px; }
+        .path-title { font-family: var(--font-title); font-size: 2.8em; text-align: center; margin-bottom: 15px; }
+        .path-description { text-align: center; font-size: 1.1em; color: #666; margin-bottom: 50px; }
+        .module { background-color: #fff; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.08); margin-bottom: 30px; }
+        .module-header { padding: 20px; background-color: var(--color-primary); color: white; border-radius: 8px 8px 0 0; cursor: pointer; }
+        .module-header h3 { margin: 0; font-family: var(--font-title); }
+        .lesson-list { list-style: none; padding: 0; margin: 0; max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .lesson-item { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #e0e0e0; text-decoration: none; color: var(--color-text); transition: background-color 0.2s; }
+        .lesson-item:last-child { border-bottom: none; }
+        .lesson-item:hover { background-color: #f8f9fa; }
+        .lesson-icon { font-size: 1.5em; margin-right: 20px; color: var(--color-primary); }
+        .lesson-title { font-weight: 600; }
+        #loading-message { text-align: center; font-size: 1.2em; color: #666; }
+        footer { text-align: center; padding: 40px 0; margin-top: 40px; background-color: #2c3e50; color: #f1f1f1; }
     </style>
 </head>
 <body>
-    <header class="app-header"><!-- ... --></header>
+    <header class="app-header">
+        <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
+            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 10 L50 40 L20 70" stroke="#333" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 10" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 70" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h1 class="logo-title">Université Mah<span>ia</span></h1>
+        </a>
+    </header>
     <main class="main-content">
         <div class="container" id="path-details-container">
             <p id="loading-message">Chargement du parcours...</p>
         </div>
     </main>
-    <footer><!-- ... --></footer>
-
+    <footer><div class="container"><p>&copy; 2025 Université Mahia. Tous droits réservés.</p></div></footer>
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             const pathDetailsContainer = document.getElementById('path-details-container');
@@ -25,44 +50,134 @@
             const pathId = urlParams.get('pathId');
             const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
 
-            if (!pathId) { /* ... */ }
+            if (!pathId) { loadingMessage.textContent = 'Erreur : Aucun parcours sélectionné.'; return; }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/mahia/learning-paths/${pathId}`);
-                if (!response.ok) { throw new Error('Erreur...'); }
+                if (!response.ok) { throw new Error('Erreur lors de la récupération des données.'); }
                 const path = await response.json();
                 
                 loadingMessage.style.display = 'none';
 
-                // ... (création du titre et de la description)
+                const title = document.createElement('h2');
+                title.className = 'path-title';
+                title.textContent = path.title;
+                pathDetailsContainer.appendChild(title);
+
+                const description = document.createElement('p');
+                description.className = 'path-description';
+                description.textContent = path.description;
+                pathDetailsContainer.appendChild(description);
 
                 path.modules.forEach(module => {
                     const moduleDiv = document.createElement('div');
                     moduleDiv.className = 'module';
-                    
                     let lessonsHtml = '';
                     module.lessons.forEach(lesson => {
-                        // ### LA CORRECTION EST ICI ###
-                        // Le lien pointe maintenant vers cours.html avec le bon ID
-                        lessonsHtml += `
-                            <a href="cours.html?lessonId=${lesson.id}" class="lesson-item">
-                                <span class="lesson-icon">🚀</span>
-                                <div>
-                                    <div class="lesson-title">${lesson.title}</div>
-                                    <p>${lesson.description}</p>
-                                </div>
-                            </a>
-                        `;
+                        lessonsHtml += `<a href="cours.html?lessonId=${lesson.id}" class="lesson-item"><span class="lesson-icon">🚀</span><div><div class="lesson-title">${lesson.title}</div><p>${lesson.description}</p></div></a>`;
                     });
-
-                    moduleDiv.innerHTML = `
-                        <div class="module-header"><h3>${module.title}</h3></div>
-                        <div class="lesson-list">${lessonsHtml}</div>
-                    `;
+                    moduleDiv.innerHTML = `<div class="module-header"><h3>${module.title}</h3></div><div class="lesson-list">${lessonsHtml}</div>`;
                     pathDetailsContainer.appendChild(moduleDiv);
                 });
 
-            } catch (error) { /* ... */ }
+                document.querySelectorAll('.module-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const lessonList = header.nextElementSibling;
+                        if (lessonList.style.maxHeight) {
+                            lessonList.style.maxHeight = null;
+                        } else {
+                            lessonList.style.maxHeight = lessonList.scrollHeight + "px";
+                        }
+                    });
+                });
+
+            } catch (error) {
+                loadingMessage.textContent = `Erreur : Impossible de charger le parcours.`;
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>```
+
+---
+### **Fichier 2 : `cours.html` (Version Finale et Corrigée)**
+**Instruction :** Remplacez intégralement le contenu de votre fichier `cours.html`.
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours - Université Mahia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Poppins:wght@300;400;600;700&family=Space+Mono&display=swap');
+        :root { --font-title: 'Lora', serif; --font-body: 'Poppins', sans-serif; --font-code: 'Space Mono', monospace; --color-primary: #0D47A1; --color-secondary: #FFC107; --color-text: #333; --color-bg: #f4f7f6; }
+        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); height: 100%; overflow: hidden; }
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        .app-header { display: flex; align-items: center; gap: 15px; padding: 15px 30px; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
+        .logo-svg { width: 30px; height: 30px; }
+        .logo-title { font-family: var(--font-title); font-size: 1.5em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--color-text); }
+        .logo-title span { color: var(--color-secondary); }
+        .lesson-workspace { display: flex; flex-grow: 1; overflow: hidden; }
+        .lesson-instructions { width: 40%; padding: 30px; background-color: #fff; overflow-y: auto; border-right: 1px solid #e0e0e0; }
+        .lesson-instructions h2 { font-family: var(--font-title); margin-top: 0; font-size: 2em; }
+        .lesson-instructions p { line-height: 1.8; }
+        .code-environment { flex-grow: 1; display: flex; flex-direction: column; background-color: #1e1e1e; }
+        .code-editor { flex-grow: 1; padding: 20px; color: #d4d4d4; font-family: var(--font-code); font-size: 14px; }
+        .kairos-chat { width: 300px; background-color: #fff; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
+                <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 10 L50 40 L20 70" stroke="#333" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 10" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 70" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h1 class="logo-title">Université Mah<span>ia</span></h1>
+            </a>
+        </header>
+        <main class="lesson-workspace">
+            <aside class="lesson-instructions" id="lesson-instructions">
+                <h2 id="lesson-title">Chargement...</h2>
+                <p id="lesson-description"></p>
+            </aside>
+            <section class="code-environment">
+                <div class="code-editor">
+                    <p style="color: #888;">// L'environnement de développement apparaîtra ici.</p>
+                </div>
+            </section>
+            <aside class="kairos-chat">
+                <p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p>
+            </aside>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const lessonTitleEl = document.getElementById('lesson-title');
+            const lessonDescriptionEl = document.getElementById('lesson-description');
+            const urlParams = new URLSearchParams(window.location.search);
+            const lessonId = urlParams.get('lessonId');
+            const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
+
+            if (!lessonId) {
+                lessonTitleEl.textContent = 'Erreur';
+                lessonDescriptionEl.textContent = 'Aucune leçon sélectionnée.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`);
+                if (!response.ok) { throw new Error('Erreur lors de la récupération des données.'); }
+                const lesson = await response.json();
+                
+                lessonTitleEl.textContent = lesson.title;
+                lessonDescriptionEl.textContent = lesson.description;
+                document.title = `${lesson.title} - Université Mahia`;
+
+            } catch (error) {
+                lessonTitleEl.textContent = 'Erreur de chargement';
+                console.error(error);
+            }
         });
     </script>
 </body>
