@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours - Université Mahia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap');
+        :root {
+            --font-title: 'Lora', serif; --font-body: 'Poppins', sans-serif;
+            --color-primary: #0D47A1; --color-secondary: #FFC107;
+            --color-text: #333; --color-bg: #f4f7f6;
+        }
+        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); line-height: 1.7; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .app-header { /* ... (styles de l'en-tête) ... */ }
+        .lesson-workspace { display: flex; height: calc(100vh - 80px); }
+        .lesson-instructions {
+            width: 40%;
+            padding: 30px;
+            background-color: #fff;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+        .lesson-instructions h2 { font-family: var(--font-title); margin-top: 0; }
+        .code-environment {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e; /* Fond sombre pour l'éditeur */
+        }
+        .code-editor {
+            flex-grow: 1;
+            padding: 20px;
+            color: #d4d4d4;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        .kairos-chat {
+            width: 300px;
+            background-color: #fff;
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header"><!-- ... (en-tête comme sur les autres pages) --></header>
+    <main class="lesson-workspace">
+        <aside class="lesson-instructions" id="lesson-instructions">
+            <h2 id="lesson-title">Chargement...</h2>
+            <p id="lesson-description"></p>
+        </aside>
+        <section class="code-environment">
+            <div class="code-editor">
+                <!-- L'environnement de code sera intégré ici -->
+                <p style="color: #888;">// L'environnement de développement apparaîtra ici.</p>
+            </div>
+        </section>
+        <aside class="kairos-chat">
+            <!-- La fenêtre de chat avec Kairos sera intégrée ici -->
+            <p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p>
+        </aside>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const lessonTitleEl = document.getElementById('lesson-title');
+            const lessonDescriptionEl = document.getElementById('lesson-description');
+            const urlParams = new URLSearchParams(window.location.search);
+            const lessonId = urlParams.get('lessonId');
+            const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
+
+            if (!lessonId) {
+                lessonTitleEl.textContent = 'Erreur';
+                lessonDescriptionEl.textContent = 'Aucune leçon sélectionnée.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`);
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des données.');
+                }
+                const lesson = await response.json();
+                
+                lessonTitleEl.textContent = lesson.title;
+                lessonDescriptionEl.textContent = lesson.description;
+                // Mettre à jour le titre de la page
+                document.title = `${lesson.title} - Université Mahia`;
+
+            } catch (error) {
+                lessonTitleEl.textContent = 'Erreur de chargement';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
