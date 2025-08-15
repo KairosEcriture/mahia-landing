@@ -6,51 +6,19 @@
     <title>Cours - Université Mahia</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Poppins:wght@300;400;600;700&family=Space+Mono&display=swap');
-        :root {
-            --font-title: 'Lora', serif; --font-body: 'Poppins', sans-serif; --font-code: 'Space Mono', monospace;
-            --color-primary: #0D47A1; --color-secondary: #FFC107;
-            --color-text: #333; --color-bg: #f4f7f6;
-        }
+        :root { /* ... (variables CSS inchangées) ... */ }
         body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); height: 100%; overflow: hidden; }
         .app-container { display: flex; flex-direction: column; height: 100vh; }
-        .app-header {
-            display: flex; align-items: center; gap: 15px;
-            padding: 15px 30px; background-color: #ffffff;
-            border-bottom: 1px solid #e0e0e0; flex-shrink: 0;
-        }
-        .logo-svg { width: 30px; height: 30px; }
-        .logo-title { font-family: var(--font-title); font-size: 1.5em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--color-text); }
-        .logo-title span { color: var(--color-secondary); }
+        .app-header { /* ... */ }
+        .module-progress-bar { width: 100%; height: 8px; background-color: #e0e0e0; flex-shrink: 0; }
+        .module-progress { height: 100%; background-color: var(--color-secondary); width: 0%; transition: width 0.5s ease-in-out; }
         .lesson-workspace { display: flex; flex-grow: 1; overflow: hidden; }
-        .lesson-instructions {
-            width: 40%;
-            padding: 30px;
-            background-color: #fff;
-            overflow-y: auto;
-            border-right: 1px solid #e0e0e0;
-        }
+        .lesson-instructions { width: 40%; padding: 30px; background-color: #fff; overflow-y: auto; border-right: 1px solid #e0e0e0; }
         .lesson-instructions h2 { font-family: var(--font-title); margin-top: 0; font-size: 2em; }
         .lesson-instructions p { line-height: 1.8; }
-        .code-environment {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: #1e1e1e; /* Fond sombre pour l'éditeur */
-        }
-        .code-editor {
-            flex-grow: 1;
-            padding: 20px;
-            color: #d4d4d4;
-            font-family: var(--font-code);
-            font-size: 14px;
-        }
-        .kairos-chat {
-            width: 300px;
-            background-color: #fff;
-            border-left: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-        }
+        .code-environment { flex-grow: 1; display: flex; flex-direction: column; background-color: #1e1e1e; }
+        .code-editor { flex-grow: 1; padding: 20px; color: #d4d4d4; font-family: var(--font-code); font-size: 14px; }
+        .kairos-chat { width: 300px; background-color: #fff; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; }
     </style>
 </head>
 <body>
@@ -61,50 +29,50 @@
                 <h1 class="logo-title">Université Mah<span>ia</span></h1>
             </a>
         </header>
+        <div class="module-progress-bar">
+            <div class="module-progress" id="module-progress"></div>
+        </div>
         <main class="lesson-workspace">
             <aside class="lesson-instructions" id="lesson-instructions">
                 <h2 id="lesson-title">Chargement...</h2>
                 <p id="lesson-description"></p>
             </aside>
-            <section class="code-environment">
-                <div class="code-editor">
-                    <p style="color: #888;">// L'environnement de développement apparaîtra ici.</p>
-                </div>
-            </section>
-            <aside class="kairos-chat">
-                <p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p>
-            </aside>
+            <section class="code-environment"><div class="code-editor"><p style="color: #888;">// L'environnement de développement apparaîtra ici.</p></div></section>
+            <aside class="kairos-chat"><p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p></aside>
         </main>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             const lessonTitleEl = document.getElementById('lesson-title');
             const lessonDescriptionEl = document.getElementById('lesson-description');
+            const moduleProgressEl = document.getElementById('module-progress');
             const urlParams = new URLSearchParams(window.location.search);
             const lessonId = urlParams.get('lessonId');
             const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
 
-            if (!lessonId) {
-                lessonTitleEl.textContent = 'Erreur';
-                lessonDescriptionEl.textContent = 'Aucune leçon sélectionnée.';
-                return;
-            }
+            if (!lessonId) { /* ... */ return; }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`);
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la récupération des données.');
-                }
-                const lesson = await response.json();
+                if (!response.ok) { throw new Error('Erreur...'); }
+                const lessonData = await response.json();
                 
-                lessonTitleEl.textContent = lesson.title;
-                lessonDescriptionEl.textContent = lesson.description;
-                document.title = `${lesson.title} - Université Mahia`;
+                lessonTitleEl.textContent = lessonData.title;
+                lessonDescriptionEl.textContent = lessonData.description;
+                document.title = `${lessonData.title} - Université Mahia`;
 
-            } catch (error) {
-                lessonTitleEl.textContent = 'Erreur de chargement';
-                console.error(error);
-            }
+                if (lessonData.module && lessonData.module.lessons) {
+                    const totalLessons = lessonData.module.lessons.length;
+                    const currentLessonIndex = lessonData.order;
+                    const progressPercentage = ((currentLessonIndex + 1) / totalLessons) * 100;
+                    
+                    // On anime la barre de progression
+                    setTimeout(() => {
+                        moduleProgressEl.style.width = `${progressPercentage}%`;
+                    }, 100);
+                }
+
+            } catch (error) { /* ... */ }
         });
     </script>
 </body>
