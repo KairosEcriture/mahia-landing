@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Mahia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        body, html { margin: 0; font-family: 'Poppins', sans-serif; background-color: #f4f7f6; }
+        .admin-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background-color: #2c3e50; color: white; padding: 20px; flex-shrink: 0; }
+        .sidebar h1 { font-size: 1.5em; text-align: center; }
+        .sidebar nav ul { list-style: none; padding: 0; }
+        .sidebar nav a { display: block; color: white; text-decoration: none; padding: 10px; border-radius: 5px; }
+        .sidebar nav a.active, .sidebar nav a:hover { background-color: #34495e; }
+        .main-content { flex-grow: 1; padding: 30px; }
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .content-header h2 { margin: 0; }
+        .btn-primary { background-color: #0D47A1; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <h1>Mahia Admin</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Parcours de Formation</a></li>
+                    <!-- D'autres liens viendront ici (Utilisateurs, etc.) -->
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Parcours de Formation</h2>
+                <button id="add-path-btn" class="btn-primary">+ Nouveau Parcours</button>
+            </div>
+            <div id="content-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Titre</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paths-table-body">
+                        <!-- Les parcours seront insérés ici par le script -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const adminToken = sessionStorage.getItem('kairos_admin_token');
+            const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
+
+            if (!adminToken) {
+                // Si pas de token admin, on renvoie à la page de connexion
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            const pathsTableBody = document.getElementById('paths-table-body');
+            const addPathBtn = document.getElementById('add-path-btn');
+
+            async function loadPaths() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/mahia/learning-paths`, {
+                        // Pas besoin d'autorisation pour lire les parcours
+                    });
+                    const paths = await response.json();
+                    
+                    pathsTableBody.innerHTML = ''; // On vide le tableau
+                    paths.forEach(path => {
+                        const row = pathsTableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${path.id}</td>
+                            <td>${path.title}</td>
+                            <td>${path.description}</td>
+                            <td><button>Gérer</button></td>
+                        `;
+                    });
+                } catch (e) {
+                    console.error("Erreur de chargement des parcours", e);
+                }
+            }
+
+            addPathBtn.addEventListener('click', async () => {
+                const title = prompt("Titre du nouveau parcours :");
+                const description = prompt("Description du parcours :");
+
+                if (title && description) {
+                    try {
+                        await fetch(`${API_BASE_URL}/admin/mahia/learning-paths`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${adminToken}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ title, description })
+                        });
+                        loadPaths(); // On rafraîchit la liste
+                    } catch (e) {
+                        alert("Erreur lors de la création du parcours.");
+                    }
+                }
+            });
+
+            // Chargement initial
+            loadPaths();
+        });
+    </script>
+</body>
+</html>
