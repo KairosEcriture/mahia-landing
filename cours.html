@@ -5,24 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cours - Université Mahia</title>
     <style>
-        /* CSS Simplifié sans la barre de progression pour le test */
         @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Poppins:wght@300;400;600;700&family=Space+Mono&display=swap');
-        :root { /* ... */ }
-        body, html { /* ... */ }
-        /* ... (le reste du CSS est correct) ... */
+        :root {
+            --font-title: 'Lora', serif; --font-body: 'Poppins', sans-serif; --font-code: 'Space Mono', monospace;
+            --color-primary: #0D47A1; --color-secondary: #FFC107;
+            --color-text: #333; --color-bg: #f4f7f6; --color-success: #4CAF50;
+        }
+        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); height: 100%; overflow: hidden; }
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        .app-header {
+            display: flex; align-items: center; gap: 15px;
+            padding: 15px 30px; background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0; flex-shrink: 0;
+        }
+        .logo-svg { width: 30px; height: 30px; }
+        .logo-title { font-family: var(--font-title); font-size: 1.5em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--color-text); }
+        .logo-title span { color: var(--color-secondary); }
+        .lesson-workspace { display: flex; flex-grow: 1; overflow: hidden; }
+        .lesson-instructions {
+            width: 40%;
+            padding: 30px;
+            background-color: #fff;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        .lesson-instructions h2 { font-family: var(--font-title); margin-top: 0; font-size: 2em; }
+        .lesson-instructions p { line-height: 1.8; }
+        .progress-section { margin-bottom: 30px; }
+        .progress-bar-container { width: 100%; height: 12px; background-color: #e9ecef; border-radius: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: var(--color-success); border-radius: 6px; width: 0%; transition: width 0.5s ease-in-out; }
+        .progress-label { font-size: 0.9em; font-weight: 500; color: #666; margin-bottom: 5px; }
+        .checkpoints-section h3 { font-family: var(--font-title); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .checkpoint-list { list-style: none; padding: 0; }
+        .checkpoint-item { margin-bottom: 15px; }
+        .checkpoint-item label { display: flex; align-items: center; cursor: pointer; font-size: 1.1em; }
+        .checkpoint-item input[type="checkbox"] { margin-right: 15px; width: 20px; height: 20px; }
+        .checkpoint-item.completed label { text-decoration: line-through; color: #888; }
+        .code-environment {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+        }
+        .code-editor {
+            flex-grow: 1;
+            padding: 20px;
+            color: #d4d4d4;
+            font-family: var(--font-code);
+            font-size: 14px;
+        }
+        .kairos-chat {
+            width: 300px;
+            background-color: #fff;
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <header class="app-header"><!-- ... --></header>
-        <!-- La barre de progression est retirée pour ce test -->
+        <header class="app-header">
+            <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
+                <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 10 L50 40 L20 70" stroke="#333" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 10" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 70" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h1 class="logo-title">Université Mah<span>ia</span></h1>
+            </a>
+        </header>
         <main class="lesson-workspace">
             <aside class="lesson-instructions" id="lesson-instructions">
-                <h2 id="lesson-title">Chargement...</h2>
-                <p id="lesson-description"></p>
+                <div id="loading-container">
+                    <h2 id="lesson-title">Chargement...</h2>
+                    <p id="lesson-description"></p>
+                </div>
+
+                <div id="content-container" style="display: none;">
+                    <div class="progress-section">
+                        <p class="progress-label">Progression dans le module : <span id="progress-text">0%</span></p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="module-progress-bar"></div>
+                        </div>
+                    </div>
+                    <div class="checkpoints-section">
+                        <h3>Objectifs de la Leçon</h3>
+                        <ul class="checkpoint-list" id="checkpoint-list">
+                            <!-- Les checkpoints seront générés par le script -->
+                        </ul>
+                    </div>
+                </div>
             </aside>
-            <section class="code-environment"><!-- ... --></section>
-            <aside class="kairos-chat"><!-- ... --></aside>
+            <section class="code-environment">
+                <div class="code-editor">
+                    <p style="color: #888;">// L'environnement de développement apparaîtra ici.</p>
+                </div>
+            </section>
+            <aside class="kairos-chat">
+                <p style="padding: 20px; color: #888;">// Le chat avec Kairos apparaîtra ici.</p>
+            </aside>
         </main>
     </div>
     <script>
@@ -33,19 +113,68 @@
             const lessonId = urlParams.get('lessonId');
             const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
 
-            if (!lessonId) { /* ... */ return; }
+            const loadingContainer = document.getElementById('loading-container');
+            const contentContainer = document.getElementById('content-container');
+            const progressText = document.getElementById('progress-text');
+            const moduleProgressBar = document.getElementById('module-progress-bar');
+            const checkpointList = document.getElementById('checkpoint-list');
+
+            if (!lessonId) {
+                lessonTitleEl.textContent = 'Erreur';
+                lessonDescriptionEl.textContent = 'Aucune leçon sélectionnée.';
+                return;
+            }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`);
-                if (!response.ok) { throw new Error('Erreur...'); }
+                if (!response.ok) { throw new Error('Erreur lors de la récupération des données.'); }
                 const lesson = await response.json();
                 
-                // On se concentre sur l'affichage du contenu de base
                 lessonTitleEl.textContent = lesson.title;
                 lessonDescriptionEl.textContent = lesson.description;
                 document.title = `${lesson.title} - Université Mahia`;
 
-            } catch (error) { /* ... */ }
+                // Simulation de checkpoints (à remplacer par de vraies données plus tard)
+                const checkpoints = [
+                    "Mettre en place la structure HTML de base.",
+                    "Ajouter les styles CSS pour l'en-tête.",
+                    "Créer la grille des caractéristiques.",
+                    "Finaliser le pied de page."
+                ];
+
+                checkpoints.forEach((text, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'checkpoint-item';
+                    li.innerHTML = `<label><input type="checkbox" data-index="${index}"> ${text}</label>`;
+                    checkpointList.appendChild(li);
+                });
+                
+                loadingContainer.style.display = 'none';
+                contentContainer.style.display = 'block';
+
+                updateProgress();
+
+                checkpointList.addEventListener('change', (event) => {
+                    if (event.target.type === 'checkbox') {
+                        event.target.closest('.checkpoint-item').classList.toggle('completed', event.target.checked);
+                        updateProgress();
+                    }
+                });
+
+            } catch (error) {
+                lessonTitleEl.textContent = 'Erreur de chargement';
+                console.error(error);
+            }
+
+            function updateProgress() {
+                const checkboxes = checkpointList.querySelectorAll('input[type="checkbox"]');
+                const checkedCount = checkpointList.querySelectorAll('input[type="checkbox"]:checked').length;
+                const totalCheckboxes = checkboxes.length;
+                const progress = totalCheckboxes > 0 ? (checkedCount / totalCheckboxes) * 100 : 0;
+
+                progressText.textContent = `${Math.round(progress)}%`;
+                moduleProgressBar.style.width = `${progress}%`;
+            }
         });
     </script>
 </body>
