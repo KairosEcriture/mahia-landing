@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cours - Université Mahia</title>
-    <!-- NOUVEAU : On importe les librairies pour CodeMirror -->
+    <!-- On importe les librairies pour CodeMirror -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/dracula.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script>
     
     <style>
@@ -20,7 +20,7 @@
             --color-primary: #0D47A1; --color-secondary: #FFC107;
             --color-text: #333; --color-bg: #f4f7f6; --color-success: #4CAF50;
         }
-        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--font-text); height: 100%; overflow: hidden; }
+        body, html { margin: 0; font-family: var(--font-body); background-color: var(--color-bg); color: var(--color-text); height: 100%; overflow: hidden; }
         .app-container { display: flex; flex-direction: column; height: 100vh; }
         .app-header {
             display: flex; align-items: center; gap: 15px;
@@ -28,7 +28,7 @@
             border-bottom: 1px solid #e0e0e0; flex-shrink: 0;
         }
         .logo-svg { width: 30px; height: 30px; }
-        .logo-title { font-family: var(--font-title); font-size: 1.5em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--font-text); }
+        .logo-title { font-family: var(--font-title); font-size: 1.5em; font-weight: 700; margin: 0; line-height: 1; text-decoration: none; color: var(--color-text); }
         .logo-title span { color: var(--color-secondary); }
         .lesson-workspace { display: flex; flex-grow: 1; overflow: hidden; }
         .lesson-instructions {
@@ -56,13 +56,12 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            background-color: #282a36; /* Thème Dracula */
+            background-color: #1e1e1e;
         }
-        /* NOUVEAU : Styles pour l'éditeur CodeMirror */
+        /* Style pour CodeMirror */
         .CodeMirror {
             flex-grow: 1 !important;
             height: auto !important;
-            font-family: var(--font-code);
             font-size: 14px;
         }
         .kairos-chat {
@@ -73,18 +72,64 @@
             flex-direction: column;
         }
         .chat-header { padding: 15px; font-weight: 600; border-bottom: 1px solid #e0e0e0; text-align: center; }
-        .chat-messages { flex-grow: 1; padding: 15px; overflow-y: auto; }
-        .chat-message { margin-bottom: 15px; max-width: 90%; display: flex; flex-direction: column; }
+        .chat-messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
+        .chat-message { margin-bottom: 15px; max-width: 90%; }
         .chat-message p { padding: 10px 15px; border-radius: 18px; line-height: 1.5; margin: 0; }
         .user-message { align-self: flex-end; }
         .user-message p { background-color: var(--color-primary); color: white; border-bottom-right-radius: 4px; }
         .kairos-message { align-self: flex-start; }
         .kairos-message p { background-color: #f1f3f5; color: var(--color-text); border-bottom-left-radius: 4px; }
-        .chat-input { display: flex; padding: 15px; border-top: 1px solid #e0e0e0; }
-        .chat-input input { flex-grow: 1; border: 1px solid #ccc; border-radius: 20px; padding: 10px 15px; font-size: 1em; }
-        .chat-input button { background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--color-primary); margin-left: 10px; }
+        .chat-input-form { display: flex; padding: 15px; border-top: 1px solid #e0e0e0; }
+        .chat-input-form input { flex-grow: 1; border: 1px solid #ccc; border-radius: 20px; padding: 10px 15px; font-size: 1em; }
+        .chat-input-form button { background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--color-primary); margin-left: 10px; }
     </style>
 </head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <a href="index.html" style="text-decoration: none; display: flex; align-items-center; gap: 15px;">
+                <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 10 L50 40 L20 70" stroke="#333" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 10" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 40 L80 70" stroke="var(--color-secondary)" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <h1 class="logo-title">Université Mah<span>ia</span></h1>
+            </a>
+        </header>
+        <main class="lesson-workspace">
+            <aside class="lesson-instructions" id="lesson-instructions">
+                <div id="loading-container">
+                    <h2 id="lesson-title">Chargement...</h2>
+                    <p id="lesson-description"></p>
+                </div>
+
+                <div id="content-container" style="display: none;">
+                    <div class="progress-section">
+                        <p class="progress-label">Progression dans le module : <span id="progress-text">0%</span></p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="module-progress-bar"></div>
+                        </div>
+                    </div>
+                    <div class="checkpoints-section">
+                        <h3>Objectifs de la Leçon</h3>
+                        <ul class="checkpoint-list" id="checkpoint-list">
+                            <!-- Les checkpoints seront générés par le script -->
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+            <section class="code-environment">
+                <!-- Le div est remplacé par un textarea pour CodeMirror -->
+                <textarea id="code-editor"></textarea>
+            </section>
+            <aside class="kairos-chat">
+                <div class="chat-header">Votre Tuteur IA : Kairos</div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="kairos-message"><p>Bonjour ! Je suis là pour vous aider. Posez-moi une question sur cette leçon.</p></div>
+                </div>
+                <form class="chat-input-form" id="chat-form">
+                    <input type="text" id="chat-input" placeholder="Posez votre question...">
+                    <button id="chat-send-btn" type="submit">➤</button>
+                </form>
+            </aside>
+        </main>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             // --- 1. INITIALISATION ---
@@ -99,13 +144,13 @@
             const progressText = document.getElementById('progress-text');
             const moduleProgressBar = document.getElementById('module-progress-bar');
             const checkpointList = document.getElementById('checkpoint-list');
-            const chatForm = document.getElementById('chat-form');
             const chatMessages = document.getElementById('chat-messages');
             const chatInput = document.getElementById('chat-input');
+            const chatForm = document.getElementById('chat-form');
             const chatSendBtn = document.getElementById('chat-send-btn');
             
             let chatHistory = [];
-            let codeEditor = null;
+            let editor = null;
 
             if (!lessonId) {
                 lessonTitleEl.textContent = 'Erreur';
@@ -113,10 +158,19 @@
                 return;
             }
 
-            // --- 2. CHARGEMENT DES DONNÉES DE LA LEÇON ---
+            // --- 2. INITIALISATION DE L'ÉDITEUR DE CODE ---
+            editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+                lineNumbers: true,
+                mode: 'htmlmixed',
+                theme: 'dracula',
+                tabSize: 2
+            });
+            editor.setValue("<!-- Votre code HTML et CSS ici -->\n\n");
+
+            // --- 3. CHARGEMENT DES DONNÉES ---
             try {
                 const response = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`);
-                if (!response.ok) { throw new Error('Erreur lors de la récupération des données.'); }
+                if (!response.ok) { throw new Error('Erreur de récupération.'); }
                 const lesson = await response.json();
                 
                 lessonTitleEl.textContent = lesson.title;
@@ -124,7 +178,13 @@
                 document.title = `${lesson.title} - Université Mahia`;
 
                 // Simulation de checkpoints
-                const checkpoints = [ "Mettre en place la structure HTML.", "Ajouter les styles CSS.", "Créer la grille.", "Finaliser le pied de page." ];
+                const checkpoints = [
+                    "Mettre en place la structure HTML de base.",
+                    "Ajouter les styles CSS pour l'en-tête.",
+                    "Créer la grille des caractéristiques.",
+                    "Finaliser le pied de page."
+                ];
+
                 checkpoints.forEach((text, index) => {
                     const li = document.createElement('li');
                     li.className = 'checkpoint-item';
@@ -134,15 +194,14 @@
                 
                 loadingContainer.style.display = 'none';
                 contentContainer.style.display = 'block';
-
-                initializeEditor();
                 updateProgress();
 
             } catch (error) {
                 lessonTitleEl.textContent = 'Erreur de chargement';
                 console.error(error);
             }
-            // --- 3. LOGIQUE DE GAMIFICATION ET CHATBOT ---
+            // --- 4. GESTION DES ÉVÉNEMENTS ---
+
             function updateProgress() {
                 const checkboxes = checkpointList.querySelectorAll('input[type="checkbox"]');
                 const checkedCount = checkpointList.querySelectorAll('input[type="checkbox"]:checked').length;
@@ -191,9 +250,9 @@
             function addMessageToChat(role, content) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `chat-message ${role}-message`;
-                const p = document.createElement('p');
-                p.textContent = content;
-                messageDiv.appendChild(p);
+                // Simple conversion du Markdown basique en HTML
+                let formattedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                messageDiv.innerHTML = `<p>${formattedContent}</p>`;
                 chatMessages.appendChild(messageDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
@@ -201,17 +260,6 @@
             }
 
             chatForm.addEventListener('submit', handleSendMessage);
-            // --- 4. INITIALISATION DE L'ÉDITEUR DE CODE ---
-            function initializeEditor() {
-                const editorContainer = document.getElementById('code-editor-container');
-                codeEditor = CodeMirror(editorContainer, {
-                    value: `<!DOCTYPE html>\n<html>\n<head>\n  <title>Ma Page</title>\n</head>\n<body>\n\n  <h1>Bonjour, Mahia !</h1>\n\n</body>\n</html>`,
-                    mode: "htmlmixed",
-                    theme: "dracula",
-                    lineNumbers: true,
-                    tabSize: 2
-                });
-            }
         });
     </script>
 </body>
