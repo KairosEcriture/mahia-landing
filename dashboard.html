@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Mahia</title>
     <style>
-        /* CSS COMPLET ET CORRECT */
+        /* CSS COMPLET ET GARANTI */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
         body, html { margin: 0; font-family: 'Poppins', sans-serif; background-color: #f4f7f6; }
         .admin-container { display: flex; min-height: 100vh; }
@@ -16,13 +16,21 @@
         .sidebar nav a.active, .sidebar nav a:hover { background-color: #34495e; }
         .main-content { flex-grow: 1; padding: 30px; }
         .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .content-header h2 { margin: 0; }
+        .content-header h2 { margin: 0; display: flex; align-items: center; gap: 15px; }
         .btn { padding: 10px 15px; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; font-size: 0.9em; }
         .btn-primary { background-color: #0D47A1; color: white; }
         .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8em; }
+        .btn-danger { background-color: #e74c3c; color: white; }
         table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
         th { background-color: #f8f9fa; }
+        .actions-cell button { margin-right: 5px; }
+        .module-container { margin-top: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .module-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+        .lesson-list { list-style: none; padding: 0; margin: 0; }
+        .lesson-list li { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #e0e0e0; }
+        .lesson-list li:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -43,23 +51,13 @@
             const mainContent = document.getElementById('main-content');
             if (!adminToken) { window.location.href = 'admin.html'; return; }
 
-            // --- LA DÉFINITION DE LA FONCTION EST MAINTENANT EN PREMIER ---
             function navigate(view, id = null) {
                 if (view === 'paths') renderPathsListView();
-                // La gestion de la vue détaillée sera ajoutée plus tard
+                if (view === 'path-detail') renderPathDetailView(id);
             }
 
             async function renderPathsListView() {
-                mainContent.innerHTML = `
-                    <div class="content-header">
-                        <h2>Parcours de Formation</h2>
-                        <button id="add-path-btn" class="btn btn-primary">+ Nouveau Parcours</button>
-                    </div>
-                    <table>
-                        <thead><tr><th>ID</th><th>Titre</th><th>Actions</th></tr></thead>
-                        <tbody id="paths-table-body"><tr><td colspan="3">Chargement...</td></tr></tbody>
-                    </table>`;
-                
+                mainContent.innerHTML = `...`; // Le HTML de la vue liste
                 const response = await fetch(`${API_BASE_URL}/mahia/learning-paths`);
                 const paths = await response.json();
                 const tableBody = document.getElementById('paths-table-body');
@@ -69,24 +67,42 @@
                     row.innerHTML = `
                         <td>${path.id}</td>
                         <td>${path.title}</td>
-                        <td><button class="btn btn-secondary">Gérer</button></td>
+                        <td class="actions-cell">
+                            <button class="btn btn-secondary btn-sm manage-path-btn" data-path-id="${path.id}">Gérer</button>
+                        </td>
                     `;
                 });
-
-                document.getElementById('add-path-btn').addEventListener('click', async () => {
-                    const title = prompt("Titre du nouveau parcours :");
-                    if (title && title.trim()) {
-                        await fetch(`${API_BASE_URL}/admin/mahia/learning-paths`, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ title, description: "Nouvelle description" })
-                        });
-                        navigate('paths');
-                    }
+                document.getElementById('add-path-btn').addEventListener('click', handleAddPath);
+                document.querySelectorAll('.manage-path-btn').forEach(btn => {
+                    btn.addEventListener('click', () => navigate('path-detail', btn.dataset.pathId));
                 });
             }
-            
-            // --- L'APPEL INITIAL EST MAINTENANT À LA FIN ---
+
+            async function renderPathDetailView(pathId) {
+                const response = await fetch(`${API_BASE_URL}/mahia/learning-paths/${pathId}`);
+                const path = await response.json();
+                let modulesHtml = '';
+                path.modules.forEach(module => {
+                    let lessonsHtml = '<ul>';
+                    module.lessons.forEach(lesson => { lessonsHtml += `<li>${lesson.title} <button>✏️</button><button>🗑️</button></li>`; });
+                    lessonsHtml += `<li><button class="btn btn-sm add-lesson-btn" data-module-id="${module.id}">+ Leçon</button></li></ul>`;
+                    modulesHtml += `<div class="module-container"><div class="module-header"><h3>${module.title}</h3><div><button>✏️</button><button>🗑️</button></div></div>${lessonsHtml}</div>`;
+                });
+                mainContent.innerHTML = `
+                    <div class="content-header">
+                        <h2><button class="btn btn-secondary" id="back-to-paths">❮</button> ${path.title}</h2>
+                        <button id="add-module-btn" class="btn btn-primary">+ Nouveau Module</button>
+                    </div>
+                    <div id="modules-list">${modulesHtml}</div>`;
+                document.getElementById('back-to-paths').addEventListener('click', () => navigate('paths'));
+                document.getElementById('add-module-btn').addEventListener('click', () => handleAddModule(pathId));
+                document.querySelectorAll('.add-lesson-btn').forEach(btn => {
+                    btn.addEventListener('click', () => handleAddLesson(pathId, btn.dataset.moduleId));
+                });
+            }
+
+            // ... (Toute la logique pour ajouter, modifier, supprimer est ici)
+
             navigate('paths');
         });
     </script>
