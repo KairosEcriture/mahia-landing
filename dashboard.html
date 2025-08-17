@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Mahia</title>
     <style>
-        /* CSS COMPLET ET GARANTI */
+        /* CSS COMPLET ET CORRECT */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
         body, html { margin: 0; font-family: 'Poppins', sans-serif; background-color: #f4f7f6; }
         .admin-container { display: flex; min-height: 100vh; }
@@ -57,10 +57,20 @@
             }
 
             async function renderPathsListView() {
-                mainContent.innerHTML = `...`; // Le HTML de la vue liste
+                mainContent.innerHTML = `
+                    <div class="content-header">
+                        <h2>Parcours de Formation</h2>
+                        <button id="add-path-btn" class="btn btn-primary">+ Nouveau Parcours</button>
+                    </div>
+                    <table>
+                        <thead><tr><th>ID</th><th>Titre</th><th>Actions</th></tr></thead>
+                        <tbody id="paths-table-body"><tr><td colspan="3">Chargement...</td></tr></tbody>
+                    </table>`;
+                
+                const tableBody = document.getElementById('paths-table-body');
                 const response = await fetch(`${API_BASE_URL}/mahia/learning-paths`);
                 const paths = await response.json();
-                const tableBody = document.getElementById('paths-table-body');
+                
                 tableBody.innerHTML = '';
                 paths.forEach(path => {
                     const row = tableBody.insertRow();
@@ -101,7 +111,39 @@
                 });
             }
 
-            // ... (Toute la logique pour ajouter, modifier, supprimer est ici)
+            async function handleAddPath() {
+                const title = prompt("Titre du nouveau parcours :");
+                if (title && title.trim()) {
+                    await fetch(`${API_BASE_URL}/admin/mahia/learning-paths`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, description: "Nouvelle description" })
+                    });
+                    navigate('paths');
+                }
+            }
+            async function handleAddModule(pathId) {
+                const title = prompt("Titre du nouveau module :");
+                if (title && title.trim()) {
+                    await fetch(`${API_BASE_URL}/admin/mahia/paths/${pathId}/modules`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title })
+                    });
+                    navigate('path-detail', pathId);
+                }
+            }
+            async function handleAddLesson(pathId, moduleId) {
+                const title = prompt("Titre de la nouvelle leçon :");
+                if (title && title.trim()) {
+                    await fetch(`${API_BASE_URL}/admin/mahia/modules/${moduleId}/lessons`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, description: "Nouvelle description" })
+                    });
+                    navigate('path-detail', pathId);
+                }
+            }
 
             navigate('paths');
         });
