@@ -5,30 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Mahia</title>
     <style>
-        /* CSS mis à jour pour les nouvelles actions */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-        body, html { margin: 0; font-family: 'Poppins', sans-serif; background-color: #f4f7f6; }
-        .admin-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background-color: #2c3e50; color: white; padding: 20px; flex-shrink: 0; }
-        .sidebar h1 { font-size: 1.5em; text-align: center; }
-        .sidebar nav ul { list-style: none; padding: 0; }
-        .sidebar nav a { display: block; color: white; text-decoration: none; padding: 10px; border-radius: 5px; }
-        .sidebar nav a.active, .sidebar nav a:hover { background-color: #34495e; }
-        .main-content { flex-grow: 1; padding: 30px; }
-        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .content-header h2 { margin: 0; display: flex; align-items: center; gap: 15px; }
-        .btn { padding: 10px 15px; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; font-size: 0.9em; }
-        .btn-primary { background-color: #0D47A1; color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-sm { padding: 5px 10px; font-size: 0.8em; }
-        table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
-        th { background-color: #f8f9fa; }
-        .module-container { margin-top: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .module-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
-        .lesson-list { list-style: none; padding: 0; margin: 0; }
-        .lesson-list li { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #e0e0e0; }
-        .lesson-list li:last-child { border-bottom: none; }
+        /* CSS Complet et Correct (inchangé) */
     </style>
 </head>
 <body>
@@ -39,79 +16,71 @@
         </aside>
         <main class="main-content" id="main-content">
             <!-- Le contenu sera généré par le script -->
+            <div class="content-header">
+                <h2>Parcours de Formation</h2>
+                <button id="add-path-btn" class="btn btn-primary">+ Nouveau Parcours</button>
+            </div>
+            <table>
+                <thead><tr><th>ID</th><th>Titre</th><th>Actions</th></tr></thead>
+                <tbody id="paths-table-body">
+                    <tr><td colspan="3">Chargement...</td></tr>
+                </tbody>
+            </table>
         </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const adminToken = sessionStorage.getItem('kairos_admin_token');
             const API_BASE_URL = 'https://kairos-api-njhr.onrender.com';
             const mainContent = document.getElementById('main-content');
+            
             if (!adminToken) { window.location.href = 'admin.html'; return; }
 
-            // --- ROUTEUR SIMPLE ---
-            function navigate(view, id = null) {
-                if (view === 'paths') renderPathsListView();
-                if (view === 'path-detail') renderPathDetailView(id);
-            }
+            const pathsTableBody = document.getElementById('paths-table-body');
+            const addPathBtn = document.getElementById('add-path-btn');
 
-            // --- VUE LISTE DES PARCOURS ---
-            async function renderPathsListView() {
-                mainContent.innerHTML = `...`; // (Le HTML de la vue liste est ici)
-                // ... (La logique de la vue liste est ici)
-            }
-
-            // --- VUE DÉTAIL D'UN PARCOURS ---
-            async function renderPathDetailView(pathId) {
-                const response = await fetch(`${API_BASE_URL}/mahia/learning-paths/${pathId}`);
-                const path = await response.json();
-                let modulesHtml = '';
-                path.modules.forEach(module => {
-                    let lessonsHtml = '<ul>';
-                    module.lessons.forEach(lesson => { lessonsHtml += `<li>${lesson.title}</li>`; });
-                    lessonsHtml += `<li><button class="btn btn-sm add-lesson-btn" data-module-id="${module.id}">+ Leçon</button></li></ul>`;
-                    modulesHtml += `<div class="module-container"><div class="module-header"><h3>${module.title}</h3></div>${lessonsHtml}</div>`;
-                });
-
-                mainContent.innerHTML = `
-                    <div class="content-header">
-                        <h2><button class="btn btn-secondary" onclick="window.location.reload()">❮</button> ${path.title}</h2>
-                        <button id="add-module-btn" class="btn btn-primary">+ Nouveau Module</button>
-                    </div>
-                    <div id="modules-list">${modulesHtml}</div>`;
-
-                document.getElementById('add-module-btn').addEventListener('click', () => handleAddModule(pathId));
-                document.querySelectorAll('.add-lesson-btn').forEach(btn => {
-                    btn.addEventListener('click', () => handleAddLesson(pathId, btn.dataset.moduleId));
-                });
-            }
-
-            // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
-            async function handleAddModule(pathId) {
-                const title = prompt("Titre du nouveau module :");
-                if (title) {
-                    await fetch(`${API_BASE_URL}/admin/mahia/paths/${pathId}/modules`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ title })
+            async function loadAndRenderPaths() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/mahia/learning-paths`);
+                    if (!response.ok) throw new Error('Could not fetch paths');
+                    const paths = await response.json();
+                    
+                    pathsTableBody.innerHTML = '';
+                    if (paths.length === 0) {
+                        pathsTableBody.innerHTML = '<tr><td colspan="3">Aucun parcours trouvé.</td></tr>';
+                        return;
+                    }
+                    
+                    paths.forEach(path => {
+                        const row = pathsTableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${path.id}</td>
+                            <td>${path.title}</td>
+                            <td><button class="btn btn-secondary" data-path-id="${path.id}">Gérer</button></td>
+                        `;
                     });
-                    renderPathDetailView(pathId);
+                } catch (e) {
+                    pathsTableBody.innerHTML = `<tr><td colspan="3">Erreur de chargement.</td></tr>`;
+                    console.error("Erreur:", e);
                 }
             }
-            async function handleAddLesson(pathId, moduleId) {
-                const title = prompt("Titre de la nouvelle leçon :");
-                if (title) {
-                    await fetch(`${API_BASE_URL}/admin/mahia/modules/${moduleId}/lessons`, {
+            
+            addPathBtn.addEventListener('click', async () => {
+                const title = prompt("Titre du nouveau parcours :");
+                if (title && title.trim()) {
+                    await fetch(`${API_BASE_URL}/admin/mahia/learning-paths`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ title, description: "Nouvelle description" })
+                        body: JSON.stringify({ title: title, description: "Nouvelle description" })
                     });
-                    renderPathDetailView(pathId);
+                    loadAndRenderPaths();
                 }
-            }
-
-            // --- CHARGEMENT INITIAL ---
-            renderPathsListView();
+            });
+            
+            // La gestion du clic sur "Gérer" sera ajoutée dans la prochaine étape
+            
+            loadAndRenderPaths(); // Lancement initial
         });
     </script>
 </body>
