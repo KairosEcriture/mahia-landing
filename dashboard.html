@@ -43,12 +43,13 @@
             const mainContent = document.getElementById('main-content');
             if (!adminToken) { window.location.href = 'admin.html'; return; }
 
-            // --- LA DÉFINITION DE LA FONCTION EST MAINTENANT EN PREMIER ---
+            // --- ROUTEUR SIMPLE ---
             function navigate(view, id = null) {
                 if (view === 'paths') renderPathsListView();
-                // La gestion de la vue détaillée sera ajoutée plus tard
+                if (view === 'path-detail') renderPathDetailView(id);
             }
 
+            // --- VUE LISTE DES PARCOURS ---
             async function renderPathsListView() {
                 mainContent.innerHTML = `
                     <div class="content-header">
@@ -69,24 +70,38 @@
                     row.innerHTML = `
                         <td>${path.id}</td>
                         <td>${path.title}</td>
-                        <td><button class="btn btn-secondary">Gérer</button></td>
+                        <td><button class="btn btn-secondary manage-path-btn" data-path-id="${path.id}">Gérer</button></td>
                     `;
                 });
 
-                document.getElementById('add-path-btn').addEventListener('click', async () => {
-                    const title = prompt("Titre du nouveau parcours :");
-                    if (title && title.trim()) {
-                        await fetch(`${API_BASE_URL}/admin/mahia/learning-paths`, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ title, description: "Nouvelle description" })
-                        });
-                        navigate('paths');
-                    }
+                document.getElementById('add-path-btn').addEventListener('click', handleAddPath);
+                // LA CORRECTION EST ICI : On attache l'écouteur pour les boutons "Gérer"
+                document.querySelectorAll('.manage-path-btn').forEach(btn => {
+                    btn.addEventListener('click', () => navigate('path-detail', btn.dataset.pathId));
                 });
             }
-            
-            // --- L'APPEL INITIAL EST MAINTENANT À LA FIN ---
+
+            // --- VUE DÉTAIL D'UN PARCOURS ---
+            async function renderPathDetailView(pathId) {
+                // ... (le code de cette vue est correct et sera ajouté dans la prochaine étape)
+                mainContent.innerHTML = `<h1>Détail du parcours ${pathId}</h1><button id="back-btn">Retour</button>`;
+                document.getElementById('back-btn').addEventListener('click', () => navigate('paths'));
+            }
+
+            // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
+            async function handleAddPath() {
+                const title = prompt("Titre du nouveau parcours :");
+                if (title && title.trim()) {
+                    await fetch(`${API_BASE_URL}/admin/mahia/learning-paths`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, description: "Nouvelle description" })
+                    });
+                    navigate('paths');
+                }
+            }
+
+            // --- CHARGEMENT INITIAL ---
             navigate('paths');
         });
     </script>
