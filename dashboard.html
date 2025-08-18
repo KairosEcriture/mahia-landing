@@ -24,13 +24,27 @@
         table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
         th { background-color: #f8f9fa; font-weight: 600; }
-        .actions-cell button { margin-right: 5px; }
+        .actions-cell { width: 150px; text-align: right; }
+        .actions-cell button { margin-left: 5px; }
         .module-container { margin-top: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .module-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
         .module-header h3 { margin: 0; font-family: 'Lora', serif; }
         .lesson-list { list-style: none; padding: 0; margin: 0; }
         .lesson-list li { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #e0e0e0; }
         .lesson-list li:last-child { border-bottom: none; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal-content { background-color: #ffffff; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e0e0e0; }
+        .modal-header h2 { margin: 0; }
+        .modal-body { padding: 20px; }
+        .modal-body .form-group { margin-bottom: 15px; }
+        .modal-body label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .modal-body input, .modal-body textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .modal-body textarea { min-height: 200px; resize: vertical; }
+        .modal-footer { padding: 20px; border-top: 1px solid #e0e0e0; text-align: right; }
+        .modal-footer button { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -47,6 +61,31 @@
         <main class="main-content" id="main-content">
             <!-- Le contenu sera généré par le script -->
         </main>
+    </div>
+    <!-- Fenêtre Modale pour éditer les leçons -->
+    <div class="modal-overlay" id="lesson-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="modal-title">Éditer la Leçon</h2></div>
+            <div class="modal-body">
+                <input type="hidden" id="lesson-id">
+                <div class="form-group">
+                    <label for="lesson-title">Titre</label>
+                    <input type="text" id="lesson-title">
+                </div>
+                <div class="form-group">
+                    <label for="lesson-description">Description</label>
+                    <textarea id="lesson-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="lesson-content">Contenu du Cours (Markdown)</label>
+                    <textarea id="lesson-content"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-lesson-modal" class="btn-secondary">Annuler</button>
+                <button id="save-lesson-modal" class="btn-primary">Sauvegarder</button>
+            </div>
+        </div>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -83,7 +122,7 @@
                         <button id="add-path-btn" class="btn btn-primary">+ Nouveau Parcours</button>
                     </div>
                     <table>
-                        <thead><tr><th>ID</th><th>Titre</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Titre</th><th class="actions-cell">Actions</th></tr></thead>
                         <tbody id="paths-table-body"><tr><td colspan="3">Chargement...</td></tr></tbody>
                     </table>`;
                 
@@ -154,7 +193,7 @@
                 tableBody.innerHTML = '';
                 preinscriptions.forEach(p => {
                     const row = tableBody.insertRow();
-                    row.innerHTML = `<td>${p.id}</td><td>${p.email}</td><td>${new Date(p.created_at).toLocaleString()}</td>`;
+                    row.innerHTML = `<td>${p.id}</td><td>${p.email}</td><td>${new Date(p.created_at).toLocaleString('fr-FR')}</td>`;
                 });
             }
 
@@ -174,7 +213,7 @@
                 }
             }
             async function handleDeletePath(pathId) {
-                if (confirm("Êtes-vous sûr de vouloir supprimer ce parcours ?")) {
+                if (confirm("Êtes-vous sûr de vouloir supprimer ce parcours ? TOUS ses modules et leçons seront perdus.")) {
                     await fetch(`${API_BASE_URL}/admin/mahia/learning-paths/${pathId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${adminToken}` } });
                     navigate('paths');
                 }
@@ -207,11 +246,27 @@
                 }
             }
             async function handleEditLesson(pathId, lessonId) {
-                const newTitle = prompt("Nouveau titre pour la leçon :");
-                if (newTitle && newTitle.trim()) {
-                    await fetch(`${API_BASE_URL}/admin/mahia/lessons/${lessonId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ title: newTitle }) });
+                const lessonModal = document.getElementById('lesson-modal');
+                const lesson = await fetch(`${API_BASE_URL}/mahia/lessons/${lessonId}`).then(res => res.json());
+                
+                document.getElementById('lesson-id').value = lesson.id;
+                document.getElementById('lesson-title').value = lesson.title;
+                document.getElementById('lesson-description').value = lesson.description;
+                document.getElementById('lesson-content').value = lesson.content;
+                
+                lessonModal.classList.add('visible');
+                
+                document.getElementById('save-lesson-modal').onclick = async () => {
+                    const data = {
+                        title: document.getElementById('lesson-title').value,
+                        description: document.getElementById('lesson-description').value,
+                        content: document.getElementById('lesson-content').value
+                    };
+                    await fetch(`${API_BASE_URL}/admin/mahia/lessons/${lessonId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                    lessonModal.classList.remove('visible');
                     navigate('path-detail', pathId);
-                }
+                };
+                document.getElementById('cancel-lesson-modal').onclick = () => lessonModal.classList.remove('visible');
             }
             async function handleDeleteLesson(pathId, lessonId) {
                 if (confirm("Êtes-vous sûr de vouloir supprimer cette leçon ?")) {
